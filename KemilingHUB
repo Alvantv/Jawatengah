@@ -33,7 +33,7 @@ HomeTab:InfoLabel("Jangan Lupa Hidupkan AntiAFK")
 
 HomeTab:Section("Main")
 
-HomeTab:Button("ANTI AFK", function(state)
+HomeTab:Button("Anti Afk", function(state)
     loadstring(game:HttpGet('https://raw.githubusercontent.com/KemilingHUB/antiafk/refs/heads/main/afk'))()
 end)
 
