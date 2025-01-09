@@ -212,7 +212,7 @@ HomeTab:Toggle("Auto Farm [Trucker] [BETA]", function(state)
 
 --// Config
 getgenv().whscript = "KemilingHUB Cdid"        --Change to the name of your script
-getgenv().webhookexecUrl = "https://discord.com/api/webhooks/1312339637880094761/hTnwBCyIpO_x1TX7fVjxzf-7Coqup2MyY0H6B0iUiuG-YK5yjsKejh9VWz6vxMvyz8yD"  --Put your Webhook Url here
+getgenv().webhookexecUrl = "https://discord.com/api/webhooks/1326816810468905033/_1TXOpjttyZ4EGO7XF217gx3qJfU1Q2gYWRWAD9RWWTx95zT29kgWY-VE8DfZQe2lpIc"  --Put your Webhook Url here
 getgenv().ExecLogSecret = true                --decide to also log secret section
 
 --// Execution Log Script
