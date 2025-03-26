@@ -33,182 +33,195 @@ HomeTab:InfoLabel("Jangan Lupa Hidupkan AntiAFK")
 
 HomeTab:Section("Main")
 
-HomeTab:Button("ANTI AFK", function(state)
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/KemilingHUB/antiafk/refs/heads/main/afk'))()
-end)
-
 HomeTab:Toggle("Auto Farm [Trucker] [BETA]", function(state)
     getfenv().drive = (state and true or false)
-    workspace.Gravity = 196
-    if workspace.Map:findFirstChild("Prop") then
-     workspace.Map.Prop:Destroy()
+    workspace.Gravity = 196.2 -- Gunakan nilai yang lebih natural
+    
+    -- Fungsi untuk menunggu dengan timeout
+    local function waitFor(condition, timeout)
+        local start = os.time()
+        while not condition() and (os.time() - start < (timeout or 10)) do
+            wait(0.1)
+        end
+        return condition()
     end
-     while getfenv().drive do
-         wait()
-         pcall(function()
- if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
- game:GetService("ReplicatedStorage").NetworkContainer.RemoteEvents.Job:FireServer("Truck")
- wait(0.1)
- game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Etc.Job.Truck.Starter.WorldPivot
- game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
- wait(5)
- game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
- wait()
- local prepos = workspace.Etc.Waypoint.Waypoint.Position
- repeat wait()
- fireproximityprompt(workspace.Etc.Job.Truck.Starter.Prompt)
- until workspace.Etc.Waypoint.Waypoint.Position ~= prepos
- wait(2)
- game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame= workspace.Etc.Job.Truck.Spawner.Part.CFrame
- workspace.Gravity = 196
- wait(2)
- local thetruck = nil
- repeat wait()
- if thetruck == nil then
- repeat wait()
- fireproximityprompt(workspace.Etc.Job.Truck.Spawner.Part.Prompt)
- until workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar")
- wait(4)
- for i,v in pairs(workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar"):GetDescendants()) do
- if v.Name == "Identifier" and v.Text == "H 9281 KGK" or v.Name == "Identifier" and v.Text == "BL 7201 EL" or v.Name == "Identifier" and v.Text == "L 9128 TIM" then
-     thetruck = v
-     print(v)
- end
- end
- end
- until thetruck ~= nil
- repeat wait()
- until workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar")
- repeat wait()
-     pcall(function()
- if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
- workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar"):FindFirstChild("DriveSeat"):Sit(game.Players.LocalPlayer.Character.Humanoid)
- wait(1)
- end
-     end)
- until game.Players.LocalPlayer.Character.Humanoid.SeatPart ~= nil
- elseif game.Players.LocalPlayer.Character.Humanoid.SeatPart ~= nil then
- local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- wait()
- local dist = (primary.Position-primary.Position+Vector3.new(0,1000,0)).magnitude
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(0, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=primary.CFrame+Vector3.new(0,1000,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position+Vector3.new(0,1000,0)).magnitude
- print(dist/150)
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(40, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame+Vector3.new(0,1000,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position+Vector3.new(0,30,0)).magnitude
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(dist/150, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame+Vector3.new(0,30,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- local prepos = workspace.Etc.Waypoint.Waypoint.Position
- repeat task.wait()
-     if workspace.Etc.Waypoint.Waypoint.Position == prepos then
-         local plr = game.Players.LocalPlayer
-         local chr = plr.Character
-         local croot = chr.HumanoidRootPart
-         local seat = chr.Humanoid.SeatPart
-         local car = seat.Parent
-         local primary = car.PrimaryPart
-         workspace.Gravity = 0
-         local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position).magnitude
-         local TweenService = game:GetService("TweenService")
-         local TweenInfoToUse = TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
-         
-         local TweenValue = Instance.new("CFrameValue")
-         TweenValue.Value = car:GetPrimaryPartCFrame()
-                 
-         TweenValue.Changed:Connect(function()
-         car:PivotTo(TweenValue.Value)
-         end)
-         local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame*CFrame.new(0,0,20)})
-         OnTween:Play()
-         OnTween.Completed:Wait()
-         if workspace.Etc.Waypoint.Waypoint.Position == prepos then
-             local plr = game.Players.LocalPlayer
- local chr = plr.Character
- local croot = chr.HumanoidRootPart
- local seat = chr.Humanoid.SeatPart
- local car = seat.Parent
- local primary = car.PrimaryPart
- workspace.Gravity = 0
- local dist = (primary.Position-workspace.Etc.Waypoint.Waypoint.Position-Vector3.new(0,25,0)).magnitude
- local TweenService = game:GetService("TweenService")
- local TweenInfoToUse = TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, false, 0)
- 
- local TweenValue = Instance.new("CFrameValue")
- TweenValue.Value = car:GetPrimaryPartCFrame()
-         
- TweenValue.Changed:Connect(function()
- car:PivotTo(TweenValue.Value)
- end)
- local OnTween = TweenService:Create(TweenValue, TweenInfoToUse, {Value=workspace.Etc.Waypoint.Waypoint.CFrame-Vector3.new(0,25,0)})
- OnTween:Play()
- OnTween.Completed:Wait()
- end
- workspace.Gravity = 200
- for i, v in pairs(car:GetDescendants()) do
-     pcall(function()
-     v.Velocity = Vector3.new(0,0,0)
-     end)
- end
- wait(2)
-     end
- until prepos ~= workspace.Etc.Waypoint.Waypoint.Position
- workspace.Gravity = 196
- end
- end)
- end
- end)
+    
+    -- Fungsi untuk memeriksa apakah player masih dalam game
+    local function checkPlayer()
+        return game.Players.LocalPlayer and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+    end
+    
+    while getfenv().drive and checkPlayer() do
+        -- Tahap 1: Ambil pekerjaan trucker
+        if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
+            -- Hancurkan prop jika ada
+            if workspace.Map:FindFirstChild("Prop") then
+                workspace.Map.Prop:Destroy()
+                wait(0.5)
+            end
+            
+            -- Ambil pekerjaan trucker
+            game:GetService("ReplicatedStorage").NetworkContainer.RemoteEvents.Job:FireServer("Truck")
+            wait(0.5)
+            
+            -- Pindah ke starter point
+            local humanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+            humanoidRootPart.CFrame = workspace.Etc.Job.Truck.Starter.WorldPivot
+            humanoidRootPart.Anchored = true
+            wait(3) -- Tunggu lebih lama
+            humanoidRootPart.Anchored = false
+            
+            -- Tunggu sampai waypoint berubah
+            local prepos = workspace.Etc.Waypoint.Waypoint.Position
+            repeat 
+                wait(0.5)
+                fireproximityprompt(workspace.Etc.Job.Truck.Starter.Prompt)
+            until not workspace.Etc.Waypoint.Waypoint.Position == prepos or not checkPlayer()
+            
+            if not checkPlayer() then break end
+            
+            -- Pindah ke spawner truck
+            wait(1)
+            humanoidRootPart.CFrame = workspace.Etc.Job.Truck.Spawner.Part.CFrame
+            workspace.Gravity = 196.2
+            wait(2)
+            
+            -- Dapatkan truck
+            local thetruck = nil
+            repeat 
+                wait(0.5)
+                if thetruck == nil then
+                    repeat 
+                        wait(0.5)
+                        fireproximityprompt(workspace.Etc.Job.Truck.Spawner.Part.Prompt)
+                    until workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar") or not checkPlayer()
+                    
+                    if not checkPlayer() then break end
+                    
+                    wait(3) -- Tunggu truck spawn
+                    
+                    for i,v in pairs(workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar"):GetDescendants()) do
+                        if v.Name == "Identifier" and (v.Text == "H 9281 KGK" or v.Text == "BL 7201 EL" or v.Text == "L 9128 TIM") then
+                            thetruck = v
+                        end
+                    end
+                end
+            until thetruck ~= nil or not checkPlayer()
+            
+            if not checkPlayer() then break end
+            
+            -- Masuk ke truck
+            repeat 
+                wait(0.5)
+                if game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
+                    local car = workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name.."sCar")
+                    if car and car:FindFirstChild("DriveSeat") then
+                        car.DriveSeat:Sit(game.Players.LocalPlayer.Character.Humanoid)
+                        wait(1)
+                    end
+                end
+            until game.Players.LocalPlayer.Character.Humanoid.SeatPart ~= nil or not checkPlayer()
+        else
+            -- Tahap 2: Mengemudikan truck
+            local plr = game.Players.LocalPlayer
+            local chr = plr.Character
+            local seat = chr.Humanoid.SeatPart
+            local car = seat.Parent
+            local primary = car.PrimaryPart
+            
+            -- Angkat truck secara perlahan
+            workspace.Gravity = 100 -- Kurangi gravity secara bertahap
+            wait(1)
+            
+            local TweenService = game:GetService("TweenService")
+            
+            -- Tween 1: Naik perlahan
+            local tweenInfo1 = TweenInfo.new(
+                5, -- Lebih lama dari sebelumnya
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out,
+                0,
+                false,
+                0
+            )
+            
+            local goal1 = {
+                CFrame = primary.CFrame + Vector3.new(0, 300, 0) -- Naik lebih rendah
+            }
+            
+            local tween1 = TweenService:Create(primary, tweenInfo1, goal1)
+            tween1:Play()
+            wait(5)
+            
+            if not checkPlayer() then break end
+            
+            -- Tween 2: Bergerak ke waypoint
+            local waypointPos = workspace.Etc.Waypoint.Waypoint.Position + Vector3.new(0, 300, 0)
+            local distance = (primary.Position - waypointPos).Magnitude
+            local duration = distance / 50 -- Kecepatan lebih lambat
+            
+            local tweenInfo2 = TweenInfo.new(
+                duration,
+                Enum.EasingStyle.Linear,
+                Enum.EasingDirection.Out,
+                0,
+                false,
+                0
+            )
+            
+            local goal2 = {
+                CFrame = CFrame.new(waypointPos)
+            }
+            
+            local tween2 = TweenService:Create(primary, tweenInfo2, goal2)
+            tween2:Play()
+            tween2.Completed:Wait()
+            
+            if not checkPlayer() then break end
+            
+            -- Tween 3: Turun perlahan
+            local targetPos = workspace.Etc.Waypoint.Waypoint.Position + Vector3.new(0, 5, 0) -- Lebih dekat ke tanah
+            local distanceToGround = (primary.Position - targetPos).Magnitude
+            local durationToGround = distanceToGround / 30 -- Lebih lambat
+            
+            local tweenInfo3 = TweenInfo.new(
+                durationToGround,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.In,
+                0,
+                false,
+                0
+            )
+            
+            local goal3 = {
+                CFrame = CFrame.new(targetPos)
+            }
+            
+            local tween3 = TweenService:Create(primary, tweenInfo3, goal3)
+            tween3:Play()
+            tween3.Completed:Wait()
+            
+            -- Tunggu sampai waypoint berubah
+            local prepos = workspace.Etc.Waypoint.Waypoint.Position
+            local attempts = 0
+            repeat 
+                wait(1)
+                attempts = attempts + 1
+                
+                if attempts > 10 then -- Jika terlalu lama, coba reset posisi
+                    primary.CFrame = workspace.Etc.Waypoint.Waypoint.CFrame * CFrame.new(0, 5, -10)
+                    wait(1)
+                end
+            until not (workspace.Etc.Waypoint.Waypoint.Position == prepos) or not checkPlayer()
+            
+            -- Reset gravity
+            workspace.Gravity = 196.2
+            wait(2)
+        end
+        
+        wait(1) -- Delay tambahan antara siklus
+    end
+end)
 
 --// Config
 getgenv().whscript = "KemilingHUB Cdid"        --Change to the name of your script
